@@ -29,6 +29,6 @@ in your opsdroid's `configuration.yaml`
 | command | args | function |
 | ----- | ----- | ----- |
 | `!mumble` | - | return server details and number of active users |
-| `!mumble <clip id> <channel> | audio clip id, channel name | plays audio clip to channel |
+| `!mumble <clip id> <channel>` | audio clip id, channel name | plays audio clip to channel |
 
 e.g. `!mumble 29 Main`
