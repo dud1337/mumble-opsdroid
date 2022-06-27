@@ -10,7 +10,7 @@
 '''
 import datetime
 import os
-from time import sleep
+from asyncio import sleep
 from random import choice, randint
 from copy import deepcopy
 import requests
@@ -131,12 +131,13 @@ class MumbleSkill(Skill):
         if not target:
             await self.avoid_spam_send(text)
             self.last_update = datetime.datetime.today()
-        await self.opsdroid.send(
-            Message(
-                text=text,
-                target=target
+        else:
+            await self.opsdroid.send(
+                Message(
+                    text=text,
+                    target=target
+                )
             )
-        )
 
     async def send_audio(self, audio_clip_id=None, channel_name=None):
         '''
@@ -186,7 +187,7 @@ class MumbleSkill(Skill):
             return
         stability_stats = []
         for _ in range(5):
-            sleep(60)
+            await sleep(60)
             old_user_state = deepcopy(self.users_state)
             self.get_users_state()
             active = self.users_state['active_users'] > 1
@@ -204,7 +205,7 @@ class MumbleSkill(Skill):
         periodically send audio clips
         One clip randomly ever quarter of the day
         '''
-        sleep(60 * 60 * randint(1, 6))
+        await sleep(60 * 60 * randint(1, 6))
         await self.send_audio(audio_clip_id='29')
 
     #############################################
