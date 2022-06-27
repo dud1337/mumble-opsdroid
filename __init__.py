@@ -129,7 +129,7 @@ class MumbleSkill(Skill):
         )
 
         if not target:
-            self.avoid_spam_send(text)
+            await self.avoid_spam_send(text)
             self.last_update = datetime.datetime.today()
         await self.opsdroid.send(
             Message(
@@ -178,13 +178,12 @@ class MumbleSkill(Skill):
         '''
         old_user_state = deepcopy(self.users_state)
         self.get_users_state()
+
         stability_check = self.users_state['active_users'] > 1
         stability_check &= self.users_state['active_users'] > old_user_state['active_users']
-
         time_since_last = datetime.datetime.today() - self.last_update
         if (not stability_check) or time_since_last < datetime.timedelta(hours=3):
             return
-
         stability_stats = []
         for _ in range(5):
             sleep(60)
