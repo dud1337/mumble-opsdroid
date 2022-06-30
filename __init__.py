@@ -16,6 +16,8 @@ from copy import deepcopy
 import requests
 import humanize
 
+import logging
+
 from aiohttp.web import Request
 from opsdroid.skill import Skill
 from opsdroid.matchers import match_regex, match_crontab, match_event, match_always
@@ -214,7 +216,7 @@ class MumbleSkill(Skill):
     #
     #############################################
 
-    @match_regex('^!mumble')
+    @match_regex('^!mumble$')
     async def command_mumble_info(self, event):
         '''
         returns server info and usercount (not including bot)
@@ -223,7 +225,7 @@ class MumbleSkill(Skill):
         '''
         await self.report_users_state(target=event.target)
 
-    @match_regex(r'^!mumble (?P<audio_clip_id>(\d{1,3})) ?(?P<channel_name>(.+)$)?')
+    @match_regex(r'^!mumble (?P<audio_clip_id>(\w{0,}\d{1,3})) ?(?P<channel_name>(.+)$)?')
     async def command_send(self, event):
         '''
         command to send audio files
