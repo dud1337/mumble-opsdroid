@@ -16,13 +16,12 @@ from copy import deepcopy
 import requests
 import humanize
 
-import logging
-
 from aiohttp.web import Request
 from opsdroid.skill import Skill
 from opsdroid.matchers import match_regex, match_crontab, match_event, match_always
 from opsdroid.events import Message
 import pymumble_py3
+from pymumble_py3.constants import *
 
 class MumbleSkill(Skill):
     '''
@@ -36,21 +35,24 @@ class MumbleSkill(Skill):
         self.mumble_cli = pymumble_py3.Mumble(
             self.config.get('mumble_host'),
             self.config.get('bot_username'),
-            port=self.config.get('mumble_port')
+            port=self.config.get('mumble_port'),
+            password=self.config.get('mumble_password'),
+            reconnect=True,
         )
-
+        self.mumble_cli.callbacks.set_callback(
+            PYMUMBLE_CLBK_CONNECTED, self.mumble_init
+        )
         self.bot_channel = None
         self.bot_channel_id = None
         self.users_state = None
+        self.mumble_cli.start()
+        self.mumble_cli.is_ready()
         self.mumble_init()
 
     def mumble_init(self):
         '''
         starts mumble client and moves to bot_channel
         '''
-        self.mumble_cli.start()
-        self.mumble_cli.is_ready()
-
         channel_name = self.config.get('bot_channel')
         self.bot_channel_id = self.mumble_cli.channels.find_by_name(channel_name)['channel_id']
         self.bot_channel = self.mumble_cli.channels[self.bot_channel_id]
@@ -209,6 +211,16 @@ class MumbleSkill(Skill):
         '''
         await sleep(60 * 60 * randint(1, 6))
         await self.send_audio(audio_clip_id='29')
+
+    @match_crontab('* * * * *')
+    async def health_check(self, event):
+        '''
+        Check if in server or not
+        '''
+        if self.mumble_cli.connected == PYMUMBLE_CONN_STATE_NOT_CONNECTED:
+            self.mumble_cli.is_ready()
+            self.mumble_cli.start()
+            self.mumble_init()
 
     #############################################
     #
