@@ -57,7 +57,7 @@ class MumbleSkill(Skill):
         self.bot_channel_id = self.mumble_cli.channels.find_by_name(channel_name)['channel_id']
         self.bot_channel = self.mumble_cli.channels[self.bot_channel_id]
         self.bot_channel.move_in()
-        self.get_users_state()
+        self.users_state = self.get_users_state()
 
     #############################################
     #
@@ -119,7 +119,6 @@ class MumbleSkill(Skill):
                 else:
                     users_state['active_users'] += 1
 
-        self.users_state = users_state
         return users_state
 
     async def report_users_state(self, target=None):
@@ -176,31 +175,33 @@ class MumbleSkill(Skill):
     #
     #############################################
 
-    @match_crontab('*/10 * * * *')
+    @match_crontab('*/20 * * * *')
     async def mumble_monitor(self, event):
         '''
         monitor mumble population and infrequently post to main room
         '''
         old_user_state = deepcopy(self.users_state)
-        self.get_users_state()
+        tmp_users_state = self.get_users_state()
 
-        stability_check = self.users_state['active_users'] > 1
-        stability_check &= self.users_state['active_users'] > old_user_state['active_users']
+        stability_check = tmp_users_state['active_users'] > 1
+        stability_check &= tmp_users_state['active_users'] > old_user_state['active_users']
         time_since_last = datetime.datetime.today() - self.last_update
-        if (not stability_check) or time_since_last < datetime.timedelta(hours=3):
+        if (not stability_check) or time_since_last < datetime.timedelta(minutes=20):
             return
+
         stability_stats = []
         for _ in range(5):
             await sleep(60)
-            old_user_state = deepcopy(self.users_state)
-            self.get_users_state()
-            active = self.users_state['active_users'] > 1
-            active &= self.users_state['active_users'] >= old_user_state['active_users']
+            old_user_state = deepcopy(tmp_users_state)
+            tmp_users_state = self.get_users_state()
+            active = tmp_users_state['active_users'] > 1
+            active &= tmp_users_state['active_users'] >= old_user_state['active_users']
             stability_stats.append(active)
 
         update = stability_stats[4] and stability_stats.count(True) > 3
 
         if update:
+            self.users_state = self.get_users_state()
             await self.report_users_state()
 
     @match_crontab('0 */6 * * *')
