@@ -175,7 +175,7 @@ class MumbleSkill(Skill):
     #
     #############################################
 
-    @match_crontab('*/20 * * * *')
+    @match_crontab('*/15 * * * *')
     async def mumble_monitor(self, event):
         '''
         monitor mumble population and infrequently post to main room
@@ -183,10 +183,20 @@ class MumbleSkill(Skill):
         old_user_state = deepcopy(self.users_state)
         tmp_users_state = self.get_users_state()
 
-        stability_check = tmp_users_state['active_users'] > 1
-        stability_check &= tmp_users_state['active_users'] > old_user_state['active_users']
+
+        active_users = tmp_users_state['active_users'] > 1
+        if not active_users:
+            self.users_state = tmp_users_state
+            return
+
         time_since_last = datetime.datetime.today() - self.last_update
-        if (not stability_check) or time_since_last < datetime.timedelta(minutes=20):
+
+        more_users_soon = tmp_users_state['active_users'] > old_user_state['active_users'])
+        time_to_remind = time_since_last > datetime.timedelta(hours=1)
+
+        stability_check = (more_users_soon || time_to_remind)
+
+        if (not stability_check) or time_since_last < datetime.timedelta(minutes=15):
             return
 
         stability_stats = []
@@ -201,8 +211,9 @@ class MumbleSkill(Skill):
         update = stability_stats[4] and stability_stats.count(True) > 3
 
         if update:
-            self.users_state = self.get_users_state()
             await self.report_users_state()
+
+        self.users_state = self.get_users_state()
 
     @match_crontab('0 */6 * * *')
     async def periodic_audio_send(self, event):
