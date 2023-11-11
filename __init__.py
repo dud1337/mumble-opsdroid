@@ -191,7 +191,7 @@ class MumbleSkill(Skill):
 
         time_since_last = datetime.datetime.today() - self.last_update
 
-        more_users_soon = tmp_users_state['active_users'] > old_user_state['active_users'])
+        more_users_soon = tmp_users_state['active_users'] > old_user_state['active_users']
         time_to_remind = time_since_last > datetime.timedelta(hours=1)
 
         stability_check = (more_users_soon || time_to_remind)
