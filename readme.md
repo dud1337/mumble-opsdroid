@@ -3,7 +3,7 @@
 A simple module for interacting with mumble using an opsdroid chat bot. Hopefully when [https://matrix.org](matrix) gets discord-esque PTT chat rooms this will be obsoleted, at least for my purposes.
 
 ## Features
-1. Monitor and notify upon request or intelligent intervals active user count
+1. Monitor and notify upon request or semi-intelligent intervals active user count
 2. Send audio clips
 
 ### Requirements
