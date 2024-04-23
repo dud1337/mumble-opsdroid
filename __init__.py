@@ -32,6 +32,7 @@ class MumbleSkill(Skill):
         super(MumbleSkill, self).__init__(*args, **kwargs)
         self.bot_was_last_message = False
         self.last_update = datetime.datetime.today() - datetime.timedelta(days=1)
+        self.link = self.config.get('mumble_link')
         self.mumble_cli = pymumble_py3.Mumble(
             self.config.get('mumble_host'),
             self.config.get('bot_username'),
@@ -127,8 +128,7 @@ class MumbleSkill(Skill):
         and active users. defaults to room_notify config var
         '''
         text = (
-            f'Host: {self.mumble_cli.host} Port: {self.mumble_cli.port}\n'
-            f'Active Users: {self.get_users_state()["active_users"]}\n'
+            f'🗣️ <a href=\"{self.link}\">Mumble</a> 📚 Active Users: {self.get_users_state()["active_users"]}'
         )
 
         if not target:
@@ -262,3 +262,20 @@ class MumbleSkill(Skill):
             audio_clip_id=event.entities['audio_clip_id']['value'],
             channel_name=event.entities['channel_name']['value']
         )
+
+    @match_regex(r'^!help mumble$')
+    async def help_mumble(self, event):
+        '''
+        Give user back text on certain commands
+        '''
+        text = 'Usage:\n'
+        text += '<b>!mumble</b> | Checks current status and gives a link for setup\n'
+        text += '<b>!mumble [n] [optional: channel]</b> | Send voice clip n - optionally specify a channel'
+
+        await self.opsdroid.send(
+            Message(
+                text=text,
+                target=event.target
+            )
+        )
+
