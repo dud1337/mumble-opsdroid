@@ -268,8 +268,8 @@ class MumbleSkill(Skill):
         '''
         Give user back text on certain commands
         '''
-        text = 'Usage:\n'
-        text += '<b>!mumble</b> | Checks current status and gives a link for setup\n'
+        text = 'Usage:<br>'
+        text += '<b>!mumble</b> | Checks current status and gives a link for setup<br>'
         text += '<b>!mumble [n] [optional: channel]</b> | Send voice clip n - optionally specify a channel'
 
         await self.opsdroid.send(
