@@ -20,7 +20,7 @@ from aiohttp.web import Request
 from opsdroid.skill import Skill
 from opsdroid.matchers import match_regex, match_crontab, match_event, match_always
 from opsdroid.events import Message
-import pymumble_py3
+import pymumble_py3 as pymumble
 from pymumble_py3.constants import *
 
 class MumbleSkill(Skill):
@@ -33,7 +33,7 @@ class MumbleSkill(Skill):
         self.bot_was_last_message = False
         self.last_update = datetime.datetime.today() - datetime.timedelta(days=1)
         self.link = self.config.get('mumble_link')
-        self.mumble_cli = pymumble_py3.Mumble(
+        self.mumble_cli = pymumble.Mumble(
             self.config.get('mumble_host'),
             self.config.get('bot_username'),
             port=self.config.get('mumble_port'),
@@ -152,7 +152,7 @@ class MumbleSkill(Skill):
         if channel_name:
             try:
                 channel_id = self.mumble_cli.channels.find_by_name(channel_name)['channel_id']
-            except pymumble_py3.errors.UnknownChannelError:
+            except pymumble.errors.UnknownChannelError:
                 return
         else:
             channel_id = self.bot_channel_id

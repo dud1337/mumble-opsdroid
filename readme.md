@@ -12,6 +12,16 @@ A simple module for interacting with mumble using an opsdroid chat bot. Hopefull
 
 `opus` also requires `ffmpeg` etc. See `Dockerfile` for details how to compile it with Alpine.
 
+I recommend installing pymumble in `Dockerfile` as follows:
+
+```yaml
+RUN git clone https://github.com/azlux/pymumble.git
+WORKDIR ./pymumble
+RUN pip3 install -r requirements.txt
+RUN pip3 install .
+WORKDIR ..
+```
+
 ### opsdroid skill config
 in your opsdroid's `configuration.yaml`
 
